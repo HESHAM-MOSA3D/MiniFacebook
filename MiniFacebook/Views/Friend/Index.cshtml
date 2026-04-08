@@ -1,0 +1,75 @@
+﻿@*
+I did not have enough time, I am sorry, Eng.Christine.    
+@model List<MiniFacebook.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "My Friends";
+}
+
+<div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-users"></i> My Friends (@Model.Count)
+    </div>
+    <div class="card-body">
+        <div class="row">
+            @foreach (var friend in Model)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card friend-item">
+                        <div class="card-body text-center">
+                            <img src="@(string.IsNullOrEmpty(friend.ProfilePicture) ? "/images/default-avatar.jpeg" : friend.ProfilePicture)"
+                                 class="rounded-circle mb-3"
+                                 width="80"
+                                 height="80"
+                                 style="object-fit: cover;" />
+                            <h6>@friend.FullName</h6>
+                            <a href="/Account/Profile/@friend.Id" class="btn btn-sm btn-primary">
+                                <i class="fas fa-user"></i> View Profile
+                            </a>
+                            <button onclick="removeFriend('@friend.Id')" class="btn btn-sm btn-danger mt-2">
+                                <i class="fas fa-user-minus"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p class="text-center text-muted">No friends yet. Start connecting with people!</p>
+        }
+    </div>
+</div>
+
+<style>
+    .friend-item {
+        transition: all 0.3s ease;
+    }
+
+        .friend-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+</style>
+
+<script>
+       function removeFriend(userId) {
+        if (confirm("Are you sure you want to remove this friend?")) {
+            fetch('/Friend/RemoveFriend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'userId=' + userId
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification("Friend removed");
+                }
+            });
+        }
+    }
+
+</script>
+
+*@

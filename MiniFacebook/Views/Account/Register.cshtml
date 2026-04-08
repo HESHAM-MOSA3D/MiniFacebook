@@ -1,0 +1,70 @@
+@using MiniFacebook.ViewModels
+@model RegisterVM
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="card shadow-lg">
+    <div class="card-body p-5">
+        <div class="text-center mb-4">
+            <i class="fas fa-user-plus" style="font-size: 60px; color: #48bb78;"></i>
+            <h2 class="mt-3" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Join Us
+            </h2>
+            <p class="text-muted">Create your account for free</p>
+        </div>
+
+        <form method="post" asp-action="Register" asp-controller="Account">
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-user"></i> Full Name
+                </label>
+                <input asp-for="FullName" class="form-control" placeholder="Ahmed Mosaad" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-at"></i> Username
+                </label>
+                <input asp-for="UserName" class="form-control" placeholder="UserName" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="********" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-custom alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <button type="submit" class="btn btn-success w-100">
+                <i class="fas fa-check-circle"></i> Register
+            </button>
+
+            <div class="text-center mt-3">
+                <a href="/login" class="text-decoration-none">
+                    Already have an account? <strong>Login</strong>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+}

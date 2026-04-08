@@ -1,0 +1,479 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MiniFacebook</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .navbar-brand:hover {
+                transform: scale(1.05);
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #667eea;
+            margin: 0;
+        }
+
+       
+
+        .btn-logout {
+            background: linear-gradient(135deg, #f56565 0%, #ed64a6 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+            .btn-logout:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+                color: white;
+            }
+
+        .main-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-control, .form-control:focus {
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            border: none;
+            color: white;
+            border-radius: 20px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+            border: none;
+            border-radius: 20px;
+        }
+
+        .comment-item {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+            .comment-item:hover {
+                background: #edf2f7;
+                transform: translateX(5px);
+            }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .post-image {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin: 10px 0;
+            background-color: #f8f9fa;
+        }
+
+        .like-button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .like-button:hover {
+                transform: scale(1.1);
+            }
+
+            .like-button.active {
+                color: #f56565;
+            }
+
+        .post-stats {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            animation: slideInRight 0.5s ease;
+        }
+
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        @@media (max-width: 768px) {
+            .main-container {
+                padding: 0 15px;
+            }
+
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div id="searchBackdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1040;"></div>
+    <nav class="navbar navbar-custom" style="position:relative; z-index: 1045;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/index">
+                MiniFacebook
+            </a>
+            @if (User.Identity.IsAuthenticated)
+            {
+                var layoutUser = await UserManager.GetUserAsync(User);
+                <div class="position-relative mx-3 flex-grow-1" style="max-width: 400px; z-index: 1050;">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted px-3"><i class="fas fa-search"></i></span>
+                        <input type="text" id="userSearchInput" class="form-control border-start-0 rounded-end-pill px-2 shadow-none" placeholder="Search for users..." autocomplete="off" />
+                    </div>
+                    <div id="searchResults" class="dropdown-menu w-100 shadow-lg mt-2" style="display:none; position:absolute; max-height: 400px; overflow-y: auto; border-radius: 12px; border:none; padding:8px;">
+                    </div>
+                </div>
+
+                <div class="user-info d-flex align-items-center ms-auto mt-2 mt-md-0">
+                    <div class="dropdown me-3 dropdown-notifications">
+                        <a href="#" class="text-secondary position-relative text-decoration-none" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.25rem;">
+                            <i class="fas fa-bell" style="background: linear-gradient(45deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="display:none; width: 10px; height: 10px;"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="notificationDropdown" style="width: 320px; max-height: 400px; overflow-y: auto; z-index: 1060;">
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom text-dark">
+                                <h6 class="mb-0 fw-bold">Notifications</h6>
+                                <button id="clearNotifsBtn" class="btn btn-sm btn-link text-muted text-decoration-none p-0" onclick="clearNotifs()" disabled>Clear</button>
+                            </div>
+                            <div id="notifList">
+                                <div class="p-3 text-center text-muted notif-empty-state">No notifications received</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="/profile/@User.Identity.Name" class="user-name text-decoration-none me-3 d-flex align-items-center" style="background: linear-gradient(45deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 1px 2px rgba(0,0,0,0.1); font-weight: 700; font-size: 1.15rem; transition: all 0.2s;">
+                        <img src="@(layoutUser != null && !string.IsNullOrEmpty(layoutUser.ProfilePicture) ? layoutUser.ProfilePicture : "/images/default-avatar.jpeg")" class="rounded-circle me-2 shadow-sm border border-light" width="35" height="35" style="object-fit: cover; border-width: 2px !important;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';"/>
+                        @@@User.Identity.Name
+                    </a>
+                    <a class="btn-logout" href="/login" onclick="fetch('/Account/Logout', {method: 'POST'})">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            }
+        </div>
+    </nav>
+
+    <div class="main-container">
+        @RenderBody()
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script>
+        // Global Notification Logic
+        $(document).ready(function() {
+            @if(User.Identity.IsAuthenticated)
+            {
+                <text>
+                window.loadNotifications = function() {
+                    fetch('/Account/GetNotifications')
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data && data.length > 0) {
+                                $('.notif-empty-state').remove();
+                                $('#clearNotifsBtn').prop('disabled', false);
+                                let hasUnread = false;
+                                $('#notifList').empty();
+                                data.forEach(n => {
+                                    if(!n.isRead) hasUnread = true;
+                                    $('#notifList').append(`
+                                        <a href="${n.url}" class="dropdown-item px-3 py-2 border-bottom text-wrap ${n.isRead ? 'bg-light text-muted' : ''}" style="white-space: normal;">
+                                            <small class="${n.isRead ? 'text-muted' : 'text-dark fw-bold'}">${!n.isRead ? '<i class="fas fa-circle text-primary me-2" style="font-size:0.5rem;"></i>' : ''}${n.message}</small>
+                                            <div class="text-muted" style="font-size:0.7rem;">${new Date(n.createdAt).toLocaleString()}</div>
+                                        </a>
+                                    `);
+                                });
+                                if(hasUnread) $('#notifBadge').show();
+                            }
+                        });
+                };
+
+                loadNotifications();
+                
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/socialHub")
+                    .build();
+
+                connection.on("ReceiveNotification", function(message, url) {
+                    $('#notifBadge').show();
+                    $('#clearNotifsBtn').prop('disabled', false);
+                    $('.notif-empty-state').remove();
+                    $('#notifList').prepend(`
+                        <a href="${url}" class="dropdown-item px-3 py-2 border-bottom text-wrap" style="white-space: normal;">
+                            <small class="text-dark fw-bold"><i class="fas fa-circle text-primary me-2" style="font-size:0.5rem;"></i>${message}</small>
+                            <div class="text-muted" style="font-size:0.7rem;">Just now</div>
+                        </a>
+                    `);
+                    
+                    const toastId = 'toast' + Date.now();
+                    const toastHtml = `
+                        <div id="${toastId}" class="toast border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header border-bottom-0 pb-0">
+                                <i class="fas fa-bell me-2" style="background: linear-gradient(45deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                                <strong class="me-auto" style="color: #a855f7;">New Notification</strong>
+                                <small class="text-muted">Just now</small>
+                                <button type="button" class="btn-close shadow-none" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body pt-1 pb-3 text-dark">
+                                <a href="${url}" class="text-decoration-none text-dark">${message}</a>
+                            </div>
+                        </div>
+                    `;
+                    $('.toast-container').append(toastHtml);
+                    const toastElement = document.getElementById(toastId);
+                    const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+                    toast.show();
+                    
+                    toastElement.addEventListener('hidden.bs.toast', function () {
+                        $(this).remove();
+                    });
+                });
+
+                connection.start().catch(err => console.error(err.toString()));
+
+                window.clearNotifs = function() {
+                    fetch('/Account/ClearNotifications', { method: 'POST' })
+                        .then(() => {
+                            $('#notifBadge').hide();
+                            $('#clearNotifsBtn').prop('disabled', true);
+                            $('#notifList').empty().append('<div class="p-3 text-center text-muted notif-empty-state">No notifications received</div>');
+                        });
+                };
+                </text>
+            }
+
+            let searchTimeout;
+            $('#userSearchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                const query = $(this).val();
+                
+                if (query.trim().length === 0) {
+                    $('#searchResults').hide();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetch(`/Account/SearchUsers?query=${encodeURIComponent(query)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const resultsContainer = $('#searchResults');
+                            resultsContainer.empty();
+                            
+                            if (data.length === 0) {
+                                resultsContainer.append('<div class="p-3 text-muted text-center"><i class="fas fa-search"></i> No users found</div>');
+                            } else {
+                                data.forEach(user => {
+                                    resultsContainer.append(`
+                                        <a href="/profile/${encodeURIComponent(user.username)}" class="dropdown-item d-flex align-items-center rounded p-2 mb-1 search-result-item" style="transition: background-color 0.2s;">
+                                            <img src="${user.profilePicture}" class="rounded-circle me-3" width="40" height="40" style="object-fit:cover; border: 2px solid #e2e8f0;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';"/>
+                                            <div>
+                                                <div class="fw-bold text-dark" style="font-size: 0.95rem;">${user.fullName}</div>
+                                                <small class="text-muted">@@${user.username}</small>
+                                            </div>
+                                        </a>
+                                    `);
+                                });
+                            }
+                            resultsContainer.show();
+                        });
+                }, 300);
+            });
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#userSearchInput, #searchResults').length) {
+                    $('#searchResults').hide();
+                    $('#searchBackdrop').fadeOut(200);
+                }
+            });
+
+            $('#userSearchInput').on('focus', function() {
+                $('#searchBackdrop').fadeIn(200);
+                if ($(this).val().trim().length > 0) {
+                    $('#searchResults').show();
+                }
+            });
+        });
+    </script>
+    <style>
+        .search-result-item:hover { background-color: #f8f9fa; transform: translateX(5px); }
+    </style>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

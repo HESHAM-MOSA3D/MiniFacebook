@@ -1,0 +1,422 @@
+@model MiniFacebook.Models.Post
+
+@{
+    ViewData["Title"] = "Post Details";
+    var currentUserId = ViewBag.CurrentUserId as string;
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <a href="/index" class="btn border-0 text-white fw-bold shadow-sm mb-3 px-4 py-2 rounded-pill" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);"><i class="fas fa-arrow-left me-2"></i> Back to Feed</a>
+
+        <div class="card shadow-lg" id="post-@Model.Id">
+            <div class="card-body">
+                <div class="post-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <a href="/profile/@Model.User.UserName">
+                            <img src="@(string.IsNullOrEmpty(Model.User.ProfilePicture) ? "/images/default-avatar.jpeg" : Model.User.ProfilePicture)" class="rounded-circle me-3 shadow-sm" width="50" height="50" style="object-fit: cover;" onerror="this.src='/images/default-avatar.jpeg';"/>
+                        </a>
+                        <div>
+                            <h5 class="mb-0">
+                                <a href="/profile/@Model.User.UserName" class="text-decoration-none text-dark hover-underline">
+                                    @Model.User.FullName
+                                </a>
+                            </h5>
+                            <small class="post-time text-muted">
+                                <i class="far fa-clock"></i> @Model.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                            </small>
+                        </div>
+                    </div>
+                    @if (currentUserId == Model.UserId)
+                    {
+                        <div>
+                            <button onclick="editPost(@Model.Id, '@Model.Content.Replace("'", "\\'")', '@Model.ImageUrl')" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                            <button onclick="deletePost(@Model.Id)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </div>
+                    }
+                </div>
+
+                <p id="post-content-@Model.Id" class="mt-4 post-content">@Model.Content</p>
+
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="post-image shadow-sm" />
+                }
+
+                <div class="post-stats mt-3 d-flex align-items-center" style="font-size: 0.95rem;">
+                    <span id="likes-count-@Model.Id" class="me-3 cursor-pointer fw-semibold text-primary" onclick="showLikesModal(@Model.Id)">
+                        <i class="fas fa-thumbs-up"></i> <span class="count">@(Model.Likes?.Count ?? 0)</span> Likes
+                    </span>
+                    <span id="comments-count-@Model.Id" class="text-muted">
+                        <i class="fas fa-comment"></i> <span class="count">@(Model.Comments?.Count ?? 0)</span> Comments
+                    </span>
+                </div>
+
+                <div class="post-actions mt-3 border-top pt-3 d-flex justify-content-around">
+                    @{ 
+                        var isLiked = currentUserId != null && Model.Likes != null && Model.Likes.Any(l => l.UserId == currentUserId);
+                    }
+                    <button class="btn btn-lg like-button flex-grow-1 mx-1 @(isLiked ? "active" : "btn-light text-muted")" onclick="toggleLike(@Model.Id, null)">
+                        <i class="fas fa-thumbs-up"></i> Like
+                    </button>
+                    <button class="btn btn-lg btn-light text-muted flex-grow-1 mx-1" onclick="document.getElementById('commentContent-@Model.Id').focus()">
+                        <i class="fas fa-comment"></i> Comment
+                    </button>
+                </div>
+
+                <div class="comments-section mt-4 pt-4 border-top">
+                    <h5 class="mb-3">Comments</h5>
+                    <div id="comments-list-@Model.Id" class="mb-4">
+                        @if (Model.Comments != null)
+                        {
+                            foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+                            {
+                                <div class="comment-item mb-3 d-flex" id="comment-@comment.Id">
+                                    <a href="/profile/@comment.User.UserName" class="text-decoration-none">
+                                        <img src="@(string.IsNullOrEmpty(comment.User.ProfilePicture) ? "/images/default-avatar.jpeg" : comment.User.ProfilePicture)" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';" />
+                                    </a>
+                                    <div class="bg-light p-3 rounded-lg flex-grow-1 w-100 position-relative">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <a href="/profile/@comment.User.UserName" class="fw-bold text-dark text-decoration-none">@comment.User.FullName</a>
+                                            <small class="text-muted">@comment.CreatedAt.ToString("MMM dd hh:mm tt")</small>
+                                        </div>
+                                        <p class="mb-2 text-dark" id="comment-text-@comment.Id">@comment.Content</p>
+                                        @if (!string.IsNullOrEmpty(comment.ImageUrl))
+                                        {
+                                            <img src="@comment.ImageUrl" class="img-fluid rounded mb-2" style="max-height: 200px; object-fit: contain; cursor: pointer;" onclick="window.open('@comment.ImageUrl', '_blank')" />
+                                        }
+                                        @if (currentUserId == comment.UserId || currentUserId == Model.UserId)
+                                        {
+                                            <div class="comment-actions mt-2 text-end">
+                                                @if (currentUserId == comment.UserId)
+                                                {
+                                                    <button onclick="editComment(@comment.Id, '@comment.Content.Replace("'", "\\'")', @Model.Id)" class="btn btn-sm btn-link text-warning p-0 me-2"><i class="fas fa-edit"></i> Edit</button>
+                                                }
+                                                <button onclick="deleteComment(@comment.Id, @Model.Id)" class="btn btn-sm btn-link text-danger p-0"><i class="fas fa-trash"></i> Delete</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="add-comment d-flex align-items-start bg-light p-3 rounded">
+                        <img src="@(string.IsNullOrEmpty(ViewBag.CurrentUserImage as string) ? "/images/default-avatar.jpeg" : ViewBag.CurrentUserImage)" class="rounded-circle me-3" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';"/>
+                        <div class="flex-grow-1">
+                            <textarea id="commentContent-@Model.Id" class="form-control mb-2" rows="2" placeholder="Write a comment..."></textarea>
+                            <div class="d-flex align-items-center mt-2">
+                                <label class="btn btn-outline-secondary btn-sm mb-0 rounded-pill px-3 me-2">
+                                    <i class="fas fa-image text-success"></i> Photo
+                                    <input type="file" id="commentImage-@Model.Id" class="d-none" accept="image/*" onchange="document.getElementById('commentImageName-@Model.Id').innerText = this.files[0] ? this.files[0].name : '';" />
+                                </label>
+                                <button onclick="sendComment(@Model.Id)" class="btn btn-primary btn-sm rounded-pill px-4"><i class="fas fa-paper-plane"></i> Post</button>
+                                <span id="commentImageName-@Model.Id" class="ms-3 text-muted small fw-semibold"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editPostModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Post</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editPostId" />
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea id="editPostContent" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="mb-3 text-center" id="editPostImagePreviewContainer" style="display: none;">
+                    <img id="editPostImagePreview" src="" style="max-width: 100%; max-height: 200px; border-radius: 10px; object-fit: contain;" />
+                    <small class="d-block text-muted mt-1">Current Image</small>
+                    <div class="form-check d-flex justify-content-center mt-2">
+                        <input class="form-check-input me-2" type="checkbox" id="removeExistingImage">
+                        <label class="form-check-label text-danger fw-semibold" for="removeExistingImage">Remove this image</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" id="editPostImageLabel">Replace Image</label>
+                    <input type="file" id="editPostImage" class="form-control" accept="image/*" onchange="document.getElementById('editPostImageName').innerText = this.files[0] ? this.files[0].name : '';" />
+                    <small id="editPostImageName" class="text-muted d-block mt-1"></small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Discard</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditPost()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deletePostModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white bg-danger">
+                <h5 class="modal-title">Delete Post</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="deletePostId" />
+                <p class="fs-5">Are you sure to delete this post?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeletePost()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="likesModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h6 class="modal-title fw-bold"><i class="fas fa-heart text-danger"></i> Liked by</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div class="list-group list-group-flush" id="likesList">
+                    <div class="text-center py-3 text-muted small"><div class="spinner-border spinner-border-sm text-primary"></div> Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        function showNotification(message, type = 'success') {
+            const notification = $(`
+                <div class="toast-notification alert alert-${type} shadow-lg" style="position: fixed; top: 20px; right: 20px; z-index: 9999; animation: slideInRight 0.5s ease;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `);
+            $('body').append(notification);
+            setTimeout(() => notification.fadeOut(() => notification.remove()), 3000);
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/socialHub")
+            .build();
+
+        connection.start().catch(err => console.error(err));
+
+        connection.on("ReceiveComment", function (postId, user, content, imageUrl, profilePic, userName) {
+            if (postId == @Model.Id) {
+                const commentsDiv = $(`#comments-list-${postId}`);
+                const newComment = `
+                    <div class="comment-item mb-3 d-flex">
+                        <a href="/profile/${userName}" class="text-decoration-none">
+                            <img src="${profilePic || '/images/default-avatar.jpeg'}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';" />
+                        </a>
+                        <div class="bg-light p-3 rounded-lg flex-grow-1 w-100 position-relative">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <a href="/profile/${userName}" class="fw-bold text-dark text-decoration-none">${user}</a>
+                                <small class="text-muted">Just now</small>
+                            </div>
+                            <p class="mb-2 text-dark">${content}</p>
+                            ${imageUrl ? `<img src="${imageUrl}" class="img-fluid rounded mb-2" style="max-height: 200px; object-fit: contain;" />` : ''}
+                        </div>
+                    </div>
+                `;
+                commentsDiv.append(newComment);
+                let countSpan = $(`#comments-count-${postId} .count`);
+                if(countSpan.length) countSpan.text((parseInt(countSpan.text()) || 0) + 1);
+                showNotification('New comment added!', 'success');
+            }
+        });
+
+        connection.on("CommentDeleted", function (commentId, postId) {
+            if (postId == @Model.Id) {
+                $(`#comment-${commentId}`).remove();
+                let countSpan = $(`#comments-count-${postId} .count`);
+                if(countSpan.length) countSpan.text(Math.max(0, (parseInt(countSpan.text()) || 0) - 1));
+            }
+        });
+
+        connection.on("CommentUpdated", function (commentId, postId, newContent) {
+            if (postId == @Model.Id) $(`#comment-text-${commentId}`).text(newContent);
+        });
+
+        connection.on("PostUpdated", function (postId, content, imageUrl, user) {
+            if (postId == @Model.Id) {
+                $(`#post-content-${postId}`).text(content);
+                showNotification('Post updated successfully!', 'success');
+            }
+        });
+
+        connection.on("PostDeleted", function (postId) {
+            if (postId == @Model.Id) {
+                showNotification('This post was deleted.', 'danger');
+                setTimeout(() => window.location.href = '/index', 1500);
+            }
+        });
+
+        connection.on("LikeToggled", function (postId, commentId, user, isLiked, likesCount) {
+            if (postId == @Model.Id) {
+                $(`#likes-count-${postId} .count`).text(likesCount);
+                const likeButton = $(`#post-${postId} .like-button`);
+                if (isLiked) {
+                    likeButton.removeClass('btn-light text-muted').addClass('active btn-primary text-white');
+                } else {
+                    likeButton.removeClass('active btn-primary text-white').addClass('btn-light text-muted');
+                }
+            }
+        });
+
+        function toggleLike(postId, commentId) {
+            fetch('/Post/ToggleLike', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `postId=${postId}&commentId=${commentId}`
+            });
+        }
+
+        function sendComment(postId) {
+            const input = $(`#commentContent-${postId}`);
+            const content = input.val();
+            if (!content.trim()) {
+                showNotification('Please write a comment', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('postId', postId);
+            formData.append('content', content);
+            const imageFile = $(`#commentImage-${postId}`)[0].files[0];
+            if (imageFile) formData.append('image', imageFile);
+
+            fetch('/Post/AddComment', {
+                method: 'POST',
+                body: formData
+            }).then(() => {
+                input.val('');
+                $(`#commentImage-${postId}`).val('');
+                showNotification('Comment added!', 'success');
+            }).catch(() => showNotification('Error adding comment', 'danger'));
+        }
+
+        function editComment(commentId, currentContent, postId) {
+            const newContent = prompt("Edit your comment:", currentContent);
+            if (newContent && newContent.trim() && newContent !== currentContent) {
+                fetch('/Post/UpdateComment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `commentId=${commentId}&postId=${postId}&content=${encodeURIComponent(newContent)}`
+                }).then(() => showNotification('Comment updated', 'success'));
+            }
+        }
+
+        function deleteComment(commentId, postId) {
+            if (confirm("Are you sure you want to delete this comment?")) {
+                fetch('/Post/DeleteComment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `commentId=${commentId}&postId=${postId}`
+                }).then(res => res.json()).then(data => {
+                    if (data.success) {
+                        $(`#comment-${commentId}`).remove();
+                        showNotification('Comment deleted', 'info');
+                    }
+                });
+            }
+        }
+
+        function showLikesModal(postId) {
+            fetch(`/Post/GetPostLikes?postId=${postId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('likesList');
+                    list.innerHTML = '';
+                    if(data.length === 0) {
+                        list.innerHTML = '<div class="text-center py-3 text-muted small">No likes yet</div>';
+                    } else {
+                        data.forEach(u => {
+                            list.innerHTML += `
+                                <a href="/profile/${u.username}" class="list-group-item list-group-item-action border-0 px-2 py-2 d-flex align-items-center rounded mb-1">
+                                    <img src="${u.profilePicture}" class="rounded-circle me-3 shadow-sm border" width="35" height="35" style="object-fit:cover;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';"/>
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size:0.9rem;">${u.fullName}</div>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                    }
+                    new bootstrap.Modal(document.getElementById('likesModal')).show();
+                });
+        }
+        function editPost(postId, currentContent, currentImageUrl) {
+            $("#editPostId").val(postId);
+            $("#editPostContent").val(currentContent);
+            $("#removeExistingImage").prop("checked", false);
+            document.getElementById('editPostImageName').innerText = '';
+            if (currentImageUrl) {
+                $("#editPostImagePreview").attr("src", currentImageUrl);
+                $("#editPostImagePreviewContainer").show();
+                $("#editPostImageLabel").text("Replace Image");
+            } else {
+                $("#editPostImagePreviewContainer").hide();
+                $("#editPostImageLabel").text("Add Image");
+            }
+            $("#editPostImage").val(''); 
+            new bootstrap.Modal(document.getElementById('editPostModal')).show();
+        }
+
+        function submitEditPost() {
+            const postId = $("#editPostId").val();
+            const newContent = $("#editPostContent").val();
+            if (!newContent.trim()) {
+                showNotification('Post content cannot be empty', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id', postId);
+            formData.append('content', newContent);
+
+            if ($("#removeExistingImage").is(':checked')) {
+                formData.append('removeImage', true);
+            }
+
+            const imageFile = $('#editPostImage')[0].files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            fetch('/Post/UpdatePost', {
+                method: 'POST',
+                body: formData
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editPostModal'));
+                modal.hide();
+            });
+        }
+
+        function deletePost(postId) {
+            $("#deletePostId").val(postId);
+            new bootstrap.Modal(document.getElementById('deletePostModal')).show();
+        }
+
+        function confirmDeletePost() {
+            const postId = $("#deletePostId").val();
+            fetch('/Post/DeletePost', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${postId}`
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deletePostModal'));
+                modal.hide();
+            });
+        }
+    </script>
+}
