@@ -16,10 +16,17 @@ The goal of this project is to practice backend development using ASP.NET and En
 ## ✨ Features
 
 - 🔐 User Registration & Login (Authentication)
-- 📝 Create, Edit, and Delete Posts
 - 👤 User Profile Page
+- 🧑 Edit Profile
 - 📰 News Feed displaying posts
+- 📝 Create, Edit, and Delete Posts
+- 🗑️ Delete Post
 - 📸 Upload/Replace Post Images
+- 🔎 Find Users
+- 👥 Followers System
+- ❤️ Like Posts (Liked By users)
+- 💬 Comments System
+- 🔔 Notifications System
 - 🧠 Clean and simple UI using Razor Pages
 
 ---
@@ -34,10 +41,7 @@ The goal of this project is to practice backend development using ASP.NET and En
 
 ---
 
-
 ## 📷 Screenshots
-
-> Add your screenshots inside `/images` folder
 
 ### 🏠 Home Page
 ![Home](images/home.png)
@@ -45,8 +49,32 @@ The goal of this project is to practice backend development using ASP.NET and En
 ### 👤 Profile Page
 ![Profile](images/profile.png)
 
+### ✏️ Edit Profile
+![Edit Profile](images/EditProfile.png)
+
 ### 📝 Create Post
-![Post](images/post.png)
+![Create Post](images/post.png)
+
+### ✏️ Edit Post
+![Edit Post](images/EditPost.png)
+
+### 🔎 Find Users
+![Find Users](images/FindUsers.png)
+
+### 👥 Followers
+![Followers](images/Followers.png)
+
+### ❤️ Liked By
+![Liked By](images/LikedBy.png)
+
+### 💬 Comments
+![Comments](images/Comments.png)
+
+### 🗑️ Delete Post
+![Delete Post](images/DeletePost.png)
+
+### 🔔 Notifications
+![Notifications](images/Notifications.png)
 
 ---
 
