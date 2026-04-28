@@ -1,96 +1,58 @@
-# MiniFacebook
+# 🚀 MiniFacebook
 
-A Razor Pages web application built with .NET 10. Intended as a minimal social platform for learning and demonstration purposes.
-
----
-
-## 🚀 Features
-- Razor Pages frontend
-- Authentication scaffold (if enabled)
-- Basic post, profile, and feed functionality (project-specific features may vary)
-- Designed for local development and easy customization
+A simple social media web application built using ASP.NET Core Razor Pages.  
+This project demonstrates building a mini social platform with authentication, user interaction, and content management.
 
 ---
 
-## 🛠 Tech Stack
-- .NET 10
--  ASP.NET Core Razor Pages
--  Entity Framework Core for data access
--  SQL Server / SQLite for database
+## 🎯 Project Overview
+
+MiniFacebook is a learning-based project that simulates core features of a social media platform such as posting, user profiles, and authentication.
+
+The goal of this project is to practice backend development using ASP.NET and Entity Framework Core while applying real-world concepts.
 
 ---
 
-## 📦 Prerequisites
-- .NET 10 SDK
-- Visual Studio 2026 or Visual Studio Code (with C# extensions)
-- Git
-- (If using SQL Server) LocalDB or SQL Server instance
+## ✨ Features
+
+- 🔐 User Registration & Login (Authentication)
+- 📝 Create, Edit, and Delete Posts
+- 👤 User Profile Page
+- 📰 News Feed displaying posts
+- 📸 Upload/Replace Post Images
+- 🧠 Clean and simple UI using Razor Pages
 
 ---
 
-## ⚡ Getting Started (PowerShell)
+## 🛠️ Tech Stack
+
+- ASP.NET Core Razor Pages
+- Entity Framework Core
+- SQL Server / SQLite
+- C#
+- Bootstrap (for UI)
+
+---
+
+
+## 📷 Screenshots
+
+> Add your screenshots inside `/images` folder
+
+### 🏠 Home Page
+![Home](images/home.png)
+
+### 👤 Profile Page
+![Profile](images/profile.png)
+
+### 📝 Create Post
+![Post](images/post.png)
+
+---
+
+## ⚙️ Getting Started
 
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/HESHAM-MOSA3D/MiniFacebook.git
 cd MiniFacebook
-
-
-2. Restore dependencies
-dotnet restore
-
-3. Build the project
-dotnet build
-
-4. Run the application
-dotnet run --project src/YourRazorProjectName
-
-
-Replace src/YourRazorProjectName with the actual path to your Razor Pages project if different.
-
-5. Open in browser
-https://localhost:5001
-or
-http://localhost:5000
-
-⚙️ Configuration
-
-The appsettings.json file contains environment-specific settings:
-
-ConnectionStrings → Database connection
-Logging → Logging configuration
-Authentication → External authentication settings (if used)
-Example connection string (LocalDB):
-"ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=MiniFacebookDb;Trusted_Connection=True;MultipleActiveResultSets=true"
-}
-
-🗄 Database (Entity Framework Core)
-Add migrations
-dotnet ef migrations add InitialCreate --project src/YourRazorProjectName --startup-project src/YourRazorProjectName
-
-Apply migrations
-dotnet ef database update --project src/YourRazorProjectName --startup-project src/YourRazorProjectName
-
-🧪 Running Tests
-
-If test projects exist in the solution:
-
-dotnet test
-
-🖥 Running in Visual Studio
-Open the solution (.sln) in Visual Studio 2026
-Set the Razor Pages project as the Startup Project
-Press F5 to run using IIS Express or project profile
-📌 Development Notes
-Follow the existing coding style in the repository
-Keep changes small and focused per feature or bug fix
-Update this README when adding major features or configuration changes
-🤝 Contributing
-Fork the repository
-Create a feature branch
-Commit changes with clear messages
-Open a Pull Request
-📄 License
-
-This project is licensed under the MIT License.
