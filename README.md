@@ -71,10 +71,10 @@ The goal of this project is to practice backend development using ASP.NET and En
 ![Comments](images/Comments.png)
 
 ### 🗑️ Delete Post
-![Delete Post](images/DeletePost.png)
+![Delete Post](images/deletepost.png)
 
 ### 🔔 Notifications
-![Notifications](images/Notifications.png)
+![Notifications](images/notifications.png)
 
 ---
 
