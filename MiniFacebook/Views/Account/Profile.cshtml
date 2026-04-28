@@ -139,7 +139,15 @@
                         <h5 class="mb-0">What's on your mind?</h5>
                     </div>
                     <textarea id="postInput" class="form-control mb-3" rows="3" placeholder="Write your post here..."></textarea>
-                    <div class="mb-3"><input type="file" id="postImage" class="form-control" accept="image/*" /></div>
+                    <div class="mb-3 d-flex align-items-center">
+                        <label class="btn btn-outline-secondary btn-sm mb-0 rounded-pill px-3">
+                            <i class="fas fa-image text-success"></i> Add Photo
+                            <input type="file" id="postImage" class="d-none" accept="image/*"
+                                   onchange="document.getElementById('postImageName').innerText = this.files[0] ? this.files[0].name : '';" />
+                        </label>
+                        <span id="postImageName" class="ms-3 text-muted small fw-semibold"></span>
+                    </div>
+
                     <button onclick="sendPost()" class="btn btn-primary w-100"><i class="fas fa-paper-plane"></i> Post</button>
                 </div>
             </div>
@@ -195,7 +203,7 @@
                         </div>
 
                         <div class="post-actions">
-                            @{ 
+                            @{
                                 var isLiked = currentUser != null && post.Likes != null && post.Likes.Any(l => l.UserId == currentUser.Id);
                             }
                             <button class="btn btn-sm like-button @(isLiked ? "active" : "btn-outline-primary")" onclick="toggleLike(@post.Id, null)">
@@ -216,7 +224,7 @@
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div class="d-flex align-items-start">
                                                     <a href="/profile/@c.User.UserName" class="text-decoration-none">
-                                                        <img src="@(string.IsNullOrEmpty(c.User.ProfilePicture) ? "/images/default-avatar.jpeg" : c.User.ProfilePicture)" class="rounded-circle me-3 shadow-sm border" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';"/>
+                                                        <img src="@(string.IsNullOrEmpty(c.User.ProfilePicture) ? "/images/default-avatar.jpeg" : c.User.ProfilePicture)" class="rounded-circle me-3 shadow-sm border" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';" />
                                                     </a>
                                                     <div class="bg-light p-2 rounded">
                                                         <a href="/profile/@c.User.UserName" class="text-decoration-none text-dark hover-underline">
@@ -244,7 +252,7 @@
                             </div>
 
                             <div class="d-flex align-items-start mt-3">
-                                <img src="@(string.IsNullOrEmpty(ViewBag.CurrentUserImage as string) ? "/images/default-avatar.jpeg" : ViewBag.CurrentUserImage)" class="rounded-circle me-3 shadow-sm border" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';"/>
+                                <img src="@(string.IsNullOrEmpty(ViewBag.CurrentUserImage as string) ? "/images/default-avatar.jpeg" : ViewBag.CurrentUserImage)" class="rounded-circle me-3 shadow-sm border" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';" />
                                 <div class="flex-grow-1">
                                     <div class="input-group mb-2">
                                         <input type="text" id="commentInput-@post.Id" class="form-control" placeholder="Write a comment..." />
@@ -331,11 +339,15 @@
                         <label class="form-check-label text-danger fw-semibold" for="removeExistingImage">Remove this image</label>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" id="editPostImageLabel">Replace Image</label>
-                    <input type="file" id="editPostImage" class="form-control" accept="image/*" onchange="document.getElementById('editPostImageName').innerText = this.files[0] ? this.files[0].name : '';" />
-                    <small id="editPostImageName" class="text-muted d-block mt-1"></small>
+                <div class="mb-3 d-flex align-items-center">
+                    <label class="btn btn-outline-secondary btn-sm mb-0 rounded-pill px-3">
+                        <i class="fas fa-image text-success"></i> Replace Image
+                        <input type="file" id="editPostImage" class="d-none" accept="image/*"
+                               onchange="document.getElementById('editPostImageName').innerText = this.files[0] ? this.files[0].name : '';" />
+                    </label>
+                    <span id="editPostImageName" class="ms-3 text-muted small fw-semibold"></span>
                 </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Discard</button>
@@ -384,6 +396,7 @@
     </div>
 </div>
 
+<!-- Followers Modal -->
 <div class="modal fade" id="followersModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
@@ -403,375 +416,375 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
 <script>
     function showFollowersModal(username) {
-        fetch(`/Account/GetFollowers?username=${encodeURIComponent(username)}`)
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById('followersList');
-                list.innerHTML = '';
-                if (data.length === 0) {
-                    list.innerHTML = '<div class="text-center py-4 text-muted">No followers yet</div>';
-                } else {
-                    data.forEach(f => {
-                        list.innerHTML += `
-                            <div class="list-group-item d-flex justify-content-between align-items-center py-3" id="follower-${f.username}">
-                                <a href="/profile/${f.username}" class="d-flex align-items-center text-decoration-none text-dark">
-                                    <img src="${f.profilePicture}" class="rounded-circle me-3 border shadow-sm" width="45" height="45" style="object-fit:cover;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';"/>
-                                    <div>
-                                        <div class="fw-bold">${f.fullName}</div>
-                                        <small class="text-muted">@@${f.username}</small>
-                                    </div>
-                                </a>
-                                <button class="btn btn-sm btn-outline-danger shadow-sm rounded-pill px-3" onclick="confirmRemoveFollower('${f.username}')">Unfollow</button>
-                            </div>
-                        `;
-                    });
-                }
-                new bootstrap.Modal(document.getElementById('followersModal')).show();
-            });
+    fetch(`/Account/GetFollowers?username=${encodeURIComponent(username)}`)
+    .then(res => res.json())
+    .then(data => {
+    const list = document.getElementById('followersList');
+    list.innerHTML = '';
+    if (data.length === 0) {
+    list.innerHTML = '<div class="text-center py-4 text-muted">No followers yet</div>';
+    } else {
+    data.forEach(f => {
+    list.innerHTML += `
+    <div class="list-group-item d-flex justify-content-between align-items-center py-3" id="follower-${f.username}">
+    <a href="/profile/${f.username}" class="d-flex align-items-center text-decoration-none text-dark">
+    <img src="${f.profilePicture}" class="rounded-circle me-3 border shadow-sm" width="45" height="45" style="object-fit:cover;" onerror="this.onerror=null; this.src='/images/default-avatar.jpeg';"/>
+    <div>
+    <div class="fw-bold">${f.fullName}</div>
+    <small class="text-muted">@@${f.username}</small>
+    </div>
+    </a>
+    <button class="btn btn-sm btn-outline-danger shadow-sm rounded-pill px-3" onclick="confirmRemoveFollower('${f.username}')">Unfollow</button>
+    </div>
+    `;
+    });
+    }
+    new bootstrap.Modal(document.getElementById('followersModal')).show();
+    });
     }
 
     function confirmRemoveFollower(username) {
-        if(confirm(`Are you sure to unfollow @@${username}?`)) {
-            fetch('/Account/RemoveFollower', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `followerUsername=${encodeURIComponent(username)}`
-            }).then(res => res.json()).then(data => {
-                if (data.success) {
-                    document.getElementById(`follower-${username}`).remove();
-                }
-            });
-        }
+    if(confirm(`Are you sure to unfollow @@${username}?`)) {
+    fetch('/Account/RemoveFollower', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: `followerUsername=${encodeURIComponent(username)}`
+    }).then(res => res.json()).then(data => {
+    if (data.success) {
+    document.getElementById(`follower-${username}`).remove();
+    }
+    });
+    }
     }
 
     function toggleFollow(username) {
-        const btn = document.getElementById('followBtn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
-        btn.disabled = true;
+    const btn = document.getElementById('followBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
+    btn.disabled = true;
 
-        fetch('/Account/ToggleFollow', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `username=${username}`
-        }).then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  if (data.isFollowing) {
-                      btn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
-                      btn.className = 'btn btn-sm mt-3 btn-secondary';
-                  } else {
-                      btn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
-                      btn.className = 'btn btn-sm mt-3 btn-primary';
-                  }
-                  btn.disabled = false;
-                  showNotification('Follow status updated!', 'success');
-              }
-          }).catch(() => {
-              btn.innerHTML = originalText;
-              btn.disabled = false;
-          });
+    fetch('/Account/ToggleFollow', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `username=${username}`
+    }).then(response => response.json())
+    .then(data => {
+    if (data.success) {
+    if (data.isFollowing) {
+    btn.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
+    btn.className = 'btn btn-sm mt-3 btn-secondary';
+    } else {
+    btn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+    btn.className = 'btn btn-sm mt-3 btn-primary';
+    }
+    btn.disabled = false;
+    showNotification('Follow status updated!', 'success');
+    }
+    }).catch(() => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    });
     }
 
     function updateProfile() {
-        var formData = new FormData();
-        formData.append('fullName', document.getElementById('fullName').value);
-        formData.append('userName', document.getElementById('userName').value);
-        formData.append('newPassword', document.getElementById('newPassword').value);
-        formData.append('bio', document.getElementById('bio').value);
-        var imageFile = document.getElementById('profilePicture').files[0];
-        if (imageFile) {
-            formData.append('profilePicture', imageFile);
-        }
+    var formData = new FormData();
+    formData.append('fullName', document.getElementById('fullName').value);
+    formData.append('userName', document.getElementById('userName').value);
+    formData.append('newPassword', document.getElementById('newPassword').value);
+    formData.append('bio', document.getElementById('bio').value);
+    var imageFile = document.getElementById('profilePicture').files[0];
+    if (imageFile) {
+    formData.append('profilePicture', imageFile);
+    }
 
-        fetch('/Account/UpdateProfile', {
-            method: 'POST',
-            body: formData
-        }).then(function(response) {
-            return response.json();
-        }).then(function(data) {
-            if (data.success) {
-                showNotification(data.message, 'success');
-                setTimeout(function() {
-                    location.reload();
-                }, 1500);
-            } else {
-                showNotification(data.message, 'danger');
-            }
-        });
+    fetch('/Account/UpdateProfile', {
+    method: 'POST',
+    body: formData
+    }).then(function(response) {
+    return response.json();
+    }).then(function(data) {
+    if (data.success) {
+    showNotification(data.message, 'success');
+    setTimeout(function() {
+    location.reload();
+    }, 1500);
+    } else {
+    showNotification(data.message, 'danger');
+    }
+    });
     }
 
     function deleteAccount() {
-        let editModal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
-        if(editModal) editModal.hide();
-        new bootstrap.Modal(document.getElementById('deleteAccountConfirmModal')).show();
+    let editModal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+    if(editModal) editModal.hide();
+    new bootstrap.Modal(document.getElementById('deleteAccountConfirmModal')).show();
     }
 
     function proceedDeleteAccount() {
-        const btn = event.target;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
-        btn.disabled = true;
+    const btn = event.target;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+    btn.disabled = true;
         
-        fetch('/Account/DeleteAccount', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }).then(function(response) {
-            return response.json();
-        }).then(function(data) {
-            if (data.success) {
-                window.location.href = '/login';
-            } else {
-                showNotification(data.message || 'Failed to delete account', 'danger');
-                btn.innerHTML = 'Yes, Delete It';
-                btn.disabled = false;
-                bootstrap.Modal.getInstance(document.getElementById('deleteAccountConfirmModal')).hide();
-            }
-        }).catch(function() {
-            showNotification('An error occurred while deleting your account.', 'danger');
-            btn.innerHTML = 'Yes, Delete It';
-            btn.disabled = false;
-        });
+    fetch('/Account/DeleteAccount', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    }).then(function(response) {
+    return response.json();
+    }).then(function(data) {
+    if (data.success) {
+    window.location.href = '/login';
+    } else {
+    showNotification(data.message || 'Failed to delete account', 'danger');
+    btn.innerHTML = 'Yes, Delete It';
+    btn.disabled = false;
+    bootstrap.Modal.getInstance(document.getElementById('deleteAccountConfirmModal')).hide();
+    }
+    }).catch(function() {
+    showNotification('An error occurred while deleting your account.', 'danger');
+    btn.innerHTML = 'Yes, Delete It';
+    btn.disabled = false;
+    });
     }
 
     function showNotification(message, type = 'success') {
-        const notification = $(`<div class="toast-notification alert alert-${type} shadow-lg"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}</div>`);
-        $('body').append(notification);
-        setTimeout(() => notification.fadeOut(() => notification.remove()), 3000);
+    const notification = $(`<div class="toast-notification alert alert-${type} shadow-lg"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}</div>`);
+    $('body').append(notification);
+    setTimeout(() => notification.fadeOut(() => notification.remove()), 3000);
     }
 
     function toggleComments(postId) {
-        $(`#comments-section-${postId}`).slideToggle();
+    $(`#comments-section-${postId}`).slideToggle();
     }
 
     function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+    });
     }
 
     const connection = new signalR.HubConnectionBuilder().withUrl("/socialHub").build();
 
     connection.on("ReceivePost", function () {
-        location.reload();
+    location.reload();
     });
 
     connection.on("ReceiveComment", function (postId, user, content, imageUrl, profilePic, userName) {
-        const commentsDiv = $(`#comments-${postId}`);
-        if (!commentsDiv.length) return;
-        const newComment = `
-            <div class="comment-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="d-flex align-items-start">
-                        <a href="/profile/${userName}" class="text-decoration-none">
-                            <img src="${profilePic || '/images/default-avatar.jpeg'}" class="rounded-circle me-3 shadow-sm border" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';"/>
-                        </a>
-                        <div class="bg-light p-2 rounded">
-                            <a href="/profile/${userName}" class="text-decoration-none text-dark hover-underline">
-                                <strong>${escapeHtml(user)}</strong>
-                            </a>
-                            <p class="mb-0 mt-1">${escapeHtml(content)}</p>
-                            ${imageUrl ? `<img src="${imageUrl}" class="post-image mt-2" style="max-width: 200px; border-radius: 8px;" />` : ''}
-                            <small class="text-muted mt-1 d-block" style="font-size: 0.75rem;">Just now</small>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        commentsDiv.append(newComment);
-        $(`#comments-section-${postId}`).slideDown();
+    const commentsDiv = $(`#comments-${postId}`);
+    if (!commentsDiv.length) return;
+    const newComment = `
+    <div class="comment-item">
+    <div class="d-flex justify-content-between align-items-start">
+    <div class="d-flex align-items-start">
+    <a href="/profile/${userName}" class="text-decoration-none">
+    <img src="${profilePic || '/images/default-avatar.jpeg'}" class="rounded-circle me-3 shadow-sm border" width="40" height="40" style="object-fit:cover;" onerror="this.src='/images/default-avatar.jpeg';"/>
+    </a>
+    <div class="bg-light p-2 rounded">
+    <a href="/profile/${userName}" class="text-decoration-none text-dark hover-underline">
+    <strong>${escapeHtml(user)}</strong>
+    </a>
+    <p class="mb-0 mt-1">${escapeHtml(content)}</p>
+    ${imageUrl ? `<img src="${imageUrl}" class="post-image mt-2" style="max-width: 200px; border-radius: 8px;" />` : ''}
+    <small class="text-muted mt-1 d-block" style="font-size: 0.75rem;">Just now</small>
+    </div>
+    </div>
+    </div>
+    </div>`;
+    commentsDiv.append(newComment);
+    $(`#comments-section-${postId}`).slideDown();
 
-        let countSpan = $(`#comment-count-${postId}`);
-        if (countSpan.length) {
-            let count = parseInt(countSpan.text()) || 0;
-            countSpan.text(count + 1);
-        }
-        showNotification('New comment added!', 'success');
+    let countSpan = $(`#comment-count-${postId}`);
+    if (countSpan.length) {
+    let count = parseInt(countSpan.text()) || 0;
+    countSpan.text(count + 1);
+    }
+    showNotification('New comment added!', 'success');
     });
 
     connection.on("CommentDeleted", function (commentId, postId) {
-        $(`#comment-${commentId}`).remove();
-        let countSpan = $(`#comment-count-${postId}`);
-        if (countSpan.length) {
-            let count = parseInt(countSpan.text()) || 0;
-            countSpan.text(Math.max(0, count - 1));
-        }
+    $(`#comment-${commentId}`).remove();
+    let countSpan = $(`#comment-count-${postId}`);
+    if (countSpan.length) {
+    let count = parseInt(countSpan.text()) || 0;
+    countSpan.text(Math.max(0, count - 1));
+    }
     });
 
     connection.on("CommentUpdated", function (commentId, postId, newContent) {
-        $(`#comment-content-${commentId}`).text(newContent);
+    $(`#comment-content-${commentId}`).text(newContent);
     });
 
     connection.on("PostDeleted", function (postId) {
-        $(`#post-${postId}`).remove();
+    $(`#post-${postId}`).remove();
     });
 
     connection.on("LikeToggled", function (postId, commentId, user, isLiked, likesCount) {
-        if (postId) {
-            $(`#likes-count-${postId}`).text(likesCount);
-            const likeButton = $(`#post-${postId} .like-button`);
-            isLiked ? likeButton.addClass('active') : likeButton.removeClass('active');
-        }
+    if (postId) {
+    $(`#likes-count-${postId}`).text(likesCount);
+    const likeButton = $(`#post-${postId} .like-button`);
+    isLiked ? likeButton.addClass('active') : likeButton.removeClass('active');
+    }
     });
 
     connection.start().catch(err => console.error(err));
 
     function sendPost() {
-        let content = document.getElementById("postInput").value;
-        if (!content.trim()) { showNotification('Please write something', 'warning'); return; }
-        let formData = new FormData();
-        formData.append('content', content);
-        let imageFile = document.getElementById('postImage').files[0];
-        if (imageFile) formData.append('image', imageFile);
-        let btn = event.target;
-        let originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner"></span> Posting...';
-        btn.disabled = true;
-        fetch('/Post/Create', { method: 'POST', body: formData })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById("postInput").value = '';
-                    document.getElementById("postImage").value = '';
-                    showNotification(data.message, 'success');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showNotification(data.message || 'Post failed', 'danger');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }
-            })
-            .catch(error => { showNotification('Error: ' + error, 'danger'); btn.innerHTML = originalText; btn.disabled = false; });
+    let content = document.getElementById("postInput").value;
+    if (!content.trim()) { showNotification('Please write something', 'warning'); return; }
+    let formData = new FormData();
+    formData.append('content', content);
+    let imageFile = document.getElementById('postImage').files[0];
+    if (imageFile) formData.append('image', imageFile);
+    let btn = event.target;
+    let originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Posting...';
+    btn.disabled = true;
+    fetch('/Post/Create', { method: 'POST', body: formData })
+    .then(response => response.json())
+    .then(data => {
+    if (data.success) {
+    document.getElementById("postInput").value = '';
+    document.getElementById("postImage").value = '';
+    showNotification(data.message, 'success');
+    setTimeout(() => location.reload(), 1000);
+    } else {
+    showNotification(data.message || 'Post failed', 'danger');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    }
+    })
+    .catch(error => { showNotification('Error: ' + error, 'danger'); btn.innerHTML = originalText; btn.disabled = false; });
     }
 
     function toggleLike(postId, commentId) {
-        fetch('/Post/ToggleLike', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `postId=${postId}&commentId=${commentId}` });
+    fetch('/Post/ToggleLike', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `postId=${postId}&commentId=${commentId}` });
     }
 
     function editPost(postId, currentContent, currentImageUrl) {
-        $("#editPostId").val(postId);
-        $("#editPostContent").val(currentContent);
-        $("#removeExistingImage").prop("checked", false);
-        document.getElementById('editPostImageName').innerText = '';
-        if (currentImageUrl) {
-            $("#editPostImagePreview").attr("src", currentImageUrl);
-            $("#editPostImagePreviewContainer").show();
-            $("#editPostImageLabel").text("Replace Image");
-        } else {
-            $("#editPostImagePreviewContainer").hide();
-            $("#editPostImageLabel").text("Add Image");
-        }
-        $("#editPostImage").val(''); 
-        new bootstrap.Modal(document.getElementById('editPostModal')).show();
+    $("#editPostId").val(postId);
+    $("#editPostContent").val(currentContent);
+    $("#removeExistingImage").prop("checked", false);
+    document.getElementById('editPostImageName').innerText = '';
+    if (currentImageUrl) {
+    $("#editPostImagePreview").attr("src", currentImageUrl);
+    $("#editPostImagePreviewContainer").show();
+    $("#editPostImageLabel").text("Replace Image");
+    } else {
+    $("#editPostImagePreviewContainer").hide();
+    $("#editPostImageLabel").text("Add Image");
+    }
+    $("#editPostImage").val('');
+    new bootstrap.Modal(document.getElementById('editPostModal')).show();
     }
 
     function submitEditPost() {
-        const postId = $("#editPostId").val();
-        const newContent = $("#editPostContent").val();
-        if (!newContent.trim()) {
-            showNotification('Post content cannot be empty', 'warning');
-            return;
-        }
+    const postId = $("#editPostId").val();
+    const newContent = $("#editPostContent").val();
+    if (!newContent.trim()) {
+    showNotification('Post content cannot be empty', 'warning');
+    return;
+    }
 
-        const formData = new FormData();
-        formData.append('id', postId);
-        formData.append('content', newContent);
+    const formData = new FormData();
+    formData.append('id', postId);
+    formData.append('content', newContent);
 
-        if ($("#removeExistingImage").is(':checked')) {
-            formData.append('removeImage', true);
-        }
+    if ($("#removeExistingImage").is(':checked')) {
+    formData.append('removeImage', true);
+    }
 
-        const imageFile = $('#editPostImage')[0].files[0];
-        if (imageFile) {
-            formData.append('image', imageFile);
-        }
+    const imageFile = $('#editPostImage')[0].files[0];
+    if (imageFile) {
+    formData.append('image', imageFile);
+    }
 
-        fetch('/Post/UpdatePost', {
-            method: 'POST',
-            body: formData
-        }).then(() => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editPostModal'));
-            modal.hide();
-        });
+    fetch('/Post/UpdatePost', {
+    method: 'POST',
+    body: formData
+    }).then(() => {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editPostModal'));
+    modal.hide();
+    });
     }
 
     function deletePost(postId) {
-        $("#deletePostId").val(postId);
-        new bootstrap.Modal(document.getElementById('deletePostModal')).show();
+    $("#deletePostId").val(postId);
+    new bootstrap.Modal(document.getElementById('deletePostModal')).show();
     }
 
     function confirmDeletePost() {
-        const postId = $("#deletePostId").val();
-        fetch('/Post/DeletePost', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `id=${postId}`
-        }).then(response => {
-            if (!response.ok) throw new Error('Delete failed');
-            return response.json();
-        }).then(data => {
-            if (data.success) {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('deletePostModal'));
-                modal.hide();
-            } else {
-                showNotification(data.message || 'Delete failed', 'danger');
-            }
-        }).catch(error => showNotification('Error: ' + error.message, 'danger'));
+    const postId = $("#deletePostId").val();
+    fetch('/Post/DeletePost', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `id=${postId}`
+    }).then(response => {
+    if (!response.ok) throw new Error('Delete failed');
+    return response.json();
+    }).then(data => {
+    if (data.success) {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('deletePostModal'));
+    modal.hide();
+    } else {
+    showNotification(data.message || 'Delete failed', 'danger');
+    }
+    }).catch(error => showNotification('Error: ' + error.message, 'danger'));
     }
 
     function sendComment(postId) {
-        let input = $(`#commentInput-${postId}`);
-        let content = input.val();
-        if (!content.trim()) { showNotification('Please write a comment', 'warning'); return; }
-        let formData = new FormData();
-        formData.append('postId', postId);
-        formData.append('content', content);
-        let imageFile = $(`#commentImage-${postId}`)[0].files[0];
-        if (imageFile) formData.append('image', imageFile);
-        fetch('/Post/AddComment', { method: 'POST', body: formData })
-            .then(() => { input.val(''); $(`#commentImage-${postId}`).val(''); showNotification('Comment added!', 'success'); })
-            .catch(() => showNotification('Error adding comment', 'danger'));
+    let input = $(`#commentInput-${postId}`);
+    let content = input.val();
+    if (!content.trim()) { showNotification('Please write a comment', 'warning'); return; }
+    let formData = new FormData();
+    formData.append('postId', postId);
+    formData.append('content', content);
+    let imageFile = $(`#commentImage-${postId}`)[0].files[0];
+    if (imageFile) formData.append('image', imageFile);
+    fetch('/Post/AddComment', { method: 'POST', body: formData })
+    .then(() => { input.val(''); $(`#commentImage-${postId}`).val(''); showNotification('Comment added!', 'success'); })
+    .catch(() => showNotification('Error adding comment', 'danger'));
     }
 
     function editComment(commentId, postId, currentContent) {
-        let newContent = prompt("Edit your comment:", currentContent);
-        if (newContent && newContent.trim() && newContent !== currentContent) {
-            fetch('/Post/UpdateComment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `commentId=${commentId}&postId=${postId}&content=${encodeURIComponent(newContent)}`
-            }).then(() => showNotification('Comment updated', 'success'));
-        }
+    let newContent = prompt("Edit your comment:", currentContent);
+    if (newContent && newContent.trim() && newContent !== currentContent) {
+    fetch('/Post/UpdateComment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `commentId=${commentId}&postId=${postId}&content=${encodeURIComponent(newContent)}`
+    }).then(() => showNotification('Comment updated', 'success'));
+    }
     }
 
     function deleteComment(commentId, postId) {
-        if (confirm("Are you sure you want to delete this comment?")) {
-            fetch('/Post/DeleteComment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `commentId=${commentId}&postId=${postId}`
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Delete failed');
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    $(`#comment-${commentId}`).remove();
-                    let countSpan = $(`#comment-count-${postId}`);
-                    if (countSpan.length) {
-                        let count = parseInt(countSpan.text()) || 0;
-                        countSpan.text(Math.max(0, count - 1));
-                    }
-                    showNotification('Comment deleted', 'info');
-                } else {
-                    showNotification(data.message || 'Delete failed', 'danger');
-                }
-            })
-            .catch(error => showNotification('Error: ' + error.message, 'danger'));
-        }
+    if (confirm("Are you sure you want to delete this comment?")) {
+    fetch('/Post/DeleteComment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `commentId=${commentId}&postId=${postId}`
+    })
+    .then(response => {
+    if (!response.ok) throw new Error('Delete failed');
+    return response.json();
+    })
+    .then(data => {
+    if (data.success) {
+    $(`#comment-${commentId}`).remove();
+    let countSpan = $(`#comment-count-${postId}`);
+    if (countSpan.length) {
+    let count = parseInt(countSpan.text()) || 0;
+    countSpan.text(Math.max(0, count - 1));
+    }
+    showNotification('Comment deleted', 'info');
+    } else {
+    showNotification(data.message || 'Delete failed', 'danger');
+    }
+    })
+    .catch(error => showNotification('Error: ' + error.message, 'danger'));
+    }
     }
 </script>
 
