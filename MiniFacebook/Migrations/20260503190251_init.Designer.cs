@@ -12,7 +12,7 @@ using MiniFacebook.Models;
 namespace MiniFacebook.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260331144726_init")]
+    [Migration("20260503190251_init")]
     partial class init
     {
         /// <inheritdoc />
