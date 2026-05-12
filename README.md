@@ -1,11 +1,11 @@
-# 🚀 MiniFacebook
+#  MiniFacebook
 
 A simple social media web application built using ASP.NET Core Razor Pages.  
 This project demonstrates building a mini social platform with authentication, user interaction, and content management.
 
 ---
 
-## 🎯 Project Overview
+##  Project Overview
 
 MiniFacebook is a learning-based project that simulates core features of a social media platform such as posting, user profiles, and authentication.
 
@@ -13,25 +13,25 @@ The goal of this project is to practice backend development using ASP.NET and En
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🔐 User Registration & Login (Authentication)
-- 👤 User Profile Page
-- 🧑 Edit Profile
-- 📰 News Feed displaying posts
-- 📝 Create, Edit, and Delete Posts
-- 🗑️ Delete Post
-- 📸 Upload/Replace Post Images
-- 🔎 Find Users
-- 👥 Followers System
-- ❤️ Like Posts (Liked By users)
-- 💬 Comments System
-- 🔔 Notifications System
-- 🧠 Clean and simple UI using Razor Pages
+-  User Registration & Login (Authentication)
+-  User Profile Page
+-  Edit Profile
+-  News Feed displaying posts
+-  Create, Edit, and Delete Posts
+-  Delete Post
+-  Upload/Replace Post Images
+-  Find Users
+-  Followers System
+-  Like Posts (Liked By users)
+-  Comments System
+-  Notifications System
+-  Clean and simple UI using Razor Pages
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - ASP.NET Core Razor Pages
 - Entity Framework Core
@@ -41,44 +41,44 @@ The goal of this project is to practice backend development using ASP.NET and En
 
 ---
 
-## 📷 Screenshots
+##  Screenshots
 
-### 🏠 Home Page
+###  Home Page
 ![Home](images/home.png)
 
-### 👤 Profile Page
+###  Profile Page
 ![Profile](images/profile.png)
 
-### ✏️ Edit Profile
+###  Edit Profile
 ![Edit Profile](images/EditProfile.png)
 
-### 📝 Create Post
+###  Create Post
 ![Create Post](images/post.png)
 
-### ✏️ Edit Post
+###  Edit Post
 ![Edit Post](images/EditPost.png)
 
-### 🔎 Find Users
+###  Find Users
 ![Find Users](images/FindUsers.png)
 
-### 👥 Followers
+###  Followers
 ![Followers](images/Followers.png)
 
-### ❤️ Liked By
+###  Liked By
 ![Liked By](images/LikedBy.png)
 
-### 💬 Comments
+###  Comments
 ![Comments](images/Comments.png)
 
-### 🗑️ Delete Post
+###  Delete Post
 ![Delete Post](images/deletepost.png)
 
-### 🔔 Notifications
+###  Notifications
 ![Notifications](images/notifications.png)
 
 ---
 
-## ⚙️ Getting Started
+##  Getting Started
 
 ### 1. Clone the repository
 ```bash
